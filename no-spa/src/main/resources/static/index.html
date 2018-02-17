@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Hello!</title>
+
+    <script type="text/javascript">
+        fetch('/spa/'+window.location.hash.substring(1))
+            .then(response => response.json())
+            .then(body => {
+                let element = document.querySelector('.hello-title');
+                element.innerHTML = element.innerText.replace(/{name}/gi, body.value);
+            });
+    </script>
+</head>
+<body>
+    <h2 class="hello-title">Hello {name}!</h2>
+</body>
+</html>
+
