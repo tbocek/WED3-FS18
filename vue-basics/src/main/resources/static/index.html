@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Hello!</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+</head>
+
+
+<body>
+    <div id="app">
+        <h2 class="hello-title">Hello {{name}}!</h2>
+        <input v-model="message" placeholder="edit me">
+    </div>
+
+    <script type="text/javascript">
+        new Vue({
+            el: '#app',
+            data: {
+                name: 'Hello Vue!',
+                message: ''
+            },
+            created: function () {
+                fetch('/spa/'+window.location.hash.substring(1))
+                    .then(response => response.json())
+                    .then(body => {
+                        this.name = body.value;
+                    });
+                console.log("created: " + this.$el)
+            },
+            mounted: function () {
+                console.log("mounted: " + this.$el)
+                console.log(this.$el.querySelector('.hello-title').innerText)
+            },
+            updated: function (){
+                console.log("updated: " + this.$el)
+                console.log(this.$el.querySelector('.hello-title').innerText)
+                //don't do this
+                if(this.message === 'test') {
+                    this.name="TEST"
+                    this.message = "changed!"
+                }
+            },
+            destroyed: function (){
+                console.log("destroyed: " + this.$el)
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Hello!</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+</head>
+
+
+<body>
+    <div id="app" @click.alt.left="dec">
+        <input v-model="message" placeholder="edit me">
+        <button @click="inc">Add 1</button>
+        <p>The button above has been clicked {{ counter }} times.</p>
+        <input @keyup.alt.67="dec" placeholder="alt-c">
+        <h1 v-once>Once counter: {{ counter }}</h1>
+        <div v-html="html"></div>
+        <div>{{html}}</div>
+        <h1 v-show="ok()">{{date1()}} || {{date2}}</h1>
+        <h1 v-if="ok()">{{date1()}} || {{date2}}</h1>
+    </div>
+
+    <script type="text/javascript">
+        new Vue({
+            el: '#app',
+            data: {
+                message: '',
+                counter: 0,
+                html: '<h1>Test</h1>'
+            },
+            methods: {
+                inc: function () {
+                    this.counter++
+                },
+                dec: function () {
+                    this.counter--
+                },
+                ok: function () {
+                    return this.counter === 10
+                },
+                date1: function () {
+                    return Date.now()
+                }
+            },
+            computed: {
+                date2: function () {
+                    return Date.now()
+                }
+            },
+            watch: {
+                counter: function (oldValue, newValue) {
+                    this.message = 'changed from '+oldValue+' to '+newValue
+                }
+            }
+        });
+    </script>
+</body>
+</html>

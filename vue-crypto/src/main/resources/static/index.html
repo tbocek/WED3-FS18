@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Coins</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+</head>
+
+<body>
+    <div id="app">
+        <ul>
+            <li v-for="item in raw">
+                {{item.name}} {{item.price_usd}}
+                <input v-model="coins[item.symbol]" placeholder="0">
+                <span v-if="coins[item.symbol]">{{item.price_usd * coins[item.symbol]}}</span> {{item.symbol}}
+            </li>
+        </ul>
+        <h1> total: {{total | round}} USD</h1>
+    </div>
+
+    <script type="text/javascript">
+        new Vue({
+            el: '#app',
+            data: {
+                raw: [],
+                coins: []
+            },
+            created: function () {
+                fetch('https://api.coinmarketcap.com/v1/ticker/?limit=10')
+                    .then(response => response.json())
+                    .then(body => { this.raw = body });
+            },
+            computed: {
+                total () {
+                    return this.raw.reduce((total, item) => {
+                        if(!isNaN(this.coins[item.symbol])) {
+                            return total + (item.price_usd * parseFloat(this.coins[item.symbol]));
+                        } else return total;
+                    }, 0)
+                }
+            },
+            filters: {
+                round: function (value) {
+                    console.log(Math.round(value))
+                    return Math.round(value)
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Coins</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+</head>
+
+<body>
+    <div id="app">
+        <h1>Bitcoin Price</h1>
+        <ticker symbol="BTC"></ticker>
+        <h1>Ethereum Price</h1>
+        <ticker symbol="ETH"></ticker>
+    </div>
+
+    <script type="text/javascript">
+        Vue.component('ticker', {
+            props: ['symbol'],
+            template: '<span>{{price}} USD</span>',
+            data: function () {
+                return {
+                    raw: {}
+                }
+            },
+            created: function () {
+                fetch('https://api.coinmarketcap.com/v1/ticker/?limit=10')
+                    .then(response => response.json())
+                    .then(body => {
+                        this.raw = body.reduce(function(map, obj) {
+                            map[obj.symbol] = obj;
+                            return map;
+                        }, {});
+                    });
+            },
+            computed: {
+                price: function() {
+                    if (typeof this.raw[this.symbol] !== 'undefined') {
+                        return this.raw[this.symbol].name + " " + this.raw[this.symbol].price_usd + "USD";
+                    }
+                }
+            }
+        })
+
+        new Vue({
+            el: '#app',
+        });
+    </script>
+</body>
+</html>
