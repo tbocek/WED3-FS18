@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Portfolio</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+</head>
+
+
+<body>
+    <div id="app">
+        <p v-for="item in coins">
+            <input v-model="item.symbol" placeholder="BTC">
+            <input v-model="item.amount" placeholder="0">
+            {{item.amount * find(item.symbol)}}
+        </p>
+
+        <input v-model="newsymbol" placeholder="BTC">
+        <button @click="coins.push({'symbol' : newsymbol, 'amount': '0'})">add</button>
+    </div>
+
+    <script type="text/javascript">
+        new Vue({
+            el: '#app',
+            data: {
+                prices: [],
+                coins: [],
+                uuid: '',
+                newsymbol: ''
+            },
+            created: function () {
+                fetch('https://api.coinmarketcap.com/v1/ticker/?limit=10')
+                    .then(response => response.json())
+                    .then(body => { this.prices = body });
+                if(window.location.hash.length == 0) {
+                    fetch('/portfolio')
+                        .then(response => response.json())
+                        .then(body => {
+                            this.uuid = body.uuid;
+                        });
+                } else {
+                    this.uuid = window.location.hash.substring(1)
+                }
+            },
+            methods: {
+                find: function(symbol) {
+                    let found = this.prices.find(function(element) {
+                        return element.symbol === symbol
+                    });
+                    return parseFloat(found.price_usd)
+                }
+            },
+            watch: {
+                uuid: function(newUuid, oldUuid) {
+                    window.location.hash = '#' + newUuid
+                        fetch('/portfolio/'+this.uuid)
+                        .then(response => response.json())
+                        .then(body => {
+                            this.coins = body;
+                        });
+                },
+                coins: {
+                    handler: function(newUuid) {
+                        fetch('/portfolio/' + this.uuid, {
+                            method: 'POST',
+                            body: JSON.stringify(this.coins)
+                        })
+                    }, deep: true
+                }
+            }
+        });
+    </script>
+</body>
+</html>
