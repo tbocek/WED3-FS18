@@ -6,7 +6,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SpringBootApplication
@@ -18,14 +17,7 @@ public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
-    @GetMapping("/portfolio")
-    public String create() {
-        UUID uuid = UUID.randomUUID();
-        while(portfolio.containsKey(uuid.toString())) {
-            uuid = UUID.randomUUID();
-        }
-        return "{\"uuid\": \""+uuid.toString()+"\"}";
-    }
+
     @GetMapping("/portfolio/{uuid}")
     public String get(@PathVariable("uuid") String uuid) {
         String retVal = portfolio.get(uuid);
@@ -40,5 +32,6 @@ public class Application {
         String json = httpEntity.getBody();
         portfolio.put(uuid, json);
     }
+
 }
 

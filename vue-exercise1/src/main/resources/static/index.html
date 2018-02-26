@@ -3,9 +3,7 @@
     <meta charset="UTF-8">
     <title>Crypto Portfolio</title>
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-
 </head>
-
 
 <body>
     <div id="app">
@@ -13,10 +11,16 @@
             <input v-model="item.symbol" placeholder="BTC">
             <input v-model="item.amount" placeholder="0">
             {{item.amount * find(item.symbol)}}
+            <button @click="remove(item.symbol)">remove</button>
         </p>
-
-        <input v-model="newsymbol" placeholder="BTC">
-        <button @click="coins.push({'symbol' : newsymbol, 'amount': '0'})">add</button>
+        <p>Total: {{total | round}} USD</p>
+        <select v-model="selected">
+            <option disabled value="">Please select one</option>
+            <option v-for="price in prices" :value="price.symbol">
+                {{ price.name }}
+            </option>
+        </select>
+        <button @click="coins.push({'symbol' : selected, 'amount': '0'})">add</button>
     </div>
 
     <script type="text/javascript">
@@ -26,28 +30,42 @@
                 prices: [],
                 coins: [],
                 uuid: '',
-                newsymbol: ''
+                selected: ''
             },
             created: function () {
-                fetch('https://api.coinmarketcap.com/v1/ticker/?limit=10')
-                    .then(response => response.json())
-                    .then(body => { this.prices = body });
+                this.fetch()
+                setInterval(this.fetch, 30 * 1000)
                 if(window.location.hash.length == 0) {
-                    fetch('/portfolio')
-                        .then(response => response.json())
-                        .then(body => {
-                            this.uuid = body.uuid;
-                        });
+                    //from: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+                    this.uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
                 } else {
                     this.uuid = window.location.hash.substring(1)
                 }
             },
             methods: {
+                fetch: function () {
+                    fetch('https://api.coinmarketcap.com/v1/ticker/?limit=10')
+                        .then(response => response.json())
+                        .then(body => { this.prices = body });
+                },
                 find: function(symbol) {
                     let found = this.prices.find(function(element) {
                         return element.symbol === symbol
                     });
                     return parseFloat(found.price_usd)
+                },
+                remove: function(symbol) {
+                    this.coins = this.coins.filter(item => item.symbol !== symbol)
+                }
+            },
+            computed: {
+                total: function () {
+                    return this.coins.reduce((total, item) => {
+                        return total + (item.amount * this.find(item.symbol));
+                    }, 0)
                 }
             },
             watch: {
@@ -66,6 +84,11 @@
                             body: JSON.stringify(this.coins)
                         })
                     }, deep: true
+                }
+            },
+            filters: {
+                round: function (value) {
+                    return Math.round(value)
                 }
             }
         });
