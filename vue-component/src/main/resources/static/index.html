@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
@@ -7,26 +8,27 @@
 
 <body>
     <div id="app">
-        <h1>Bitcoin Price</h1>
-        <ticker symbol="BTC"></ticker>
-        <h1>Ethereum Price</h1>
-        <ticker symbol="ETH"></ticker>
+        <h1>Cryptocurrency Prices</h1>
+        <ticker symbol="LTC"></ticker>
+        <ticker :symbol="current1"></ticker>
+        <ticker :symbol="current2"></ticker>
+
     </div>
 
     <script type="text/javascript">
         Vue.component('ticker', {
             props: ['symbol'],
-            template: '<span>{{price}} USD</span>',
+            template: '<p>{{price}} USD</p>',
             data: function () {
                 return {
-                    raw: {}
+                    coinmarketcapData: {}
                 }
             },
             created: function () {
                 fetch('https://api.coinmarketcap.com/v1/ticker/?limit=10')
                     .then(response => response.json())
                     .then(body => {
-                        this.raw = body.reduce(function(map, obj) {
+                        this.coinmarketcapData = body.reduce(function(map, obj) {
                             map[obj.symbol] = obj;
                             return map;
                         }, {});
@@ -34,15 +36,23 @@
             },
             computed: {
                 price: function() {
-                    if (typeof this.raw[this.symbol] !== 'undefined') {
-                        return this.raw[this.symbol].name + " " + this.raw[this.symbol].price_usd + "USD";
+                    if (typeof this.coinmarketcapData[this.symbol] !== 'undefined') {
+                        return this.coinmarketcapData[this.symbol].name + " " + this.coinmarketcapData[this.symbol].price_usd;
                     }
+                }
+            },
+            watch: {
+                symbol (newValue, oldValue) {
+                    console.log("changed: "+newValue)
                 }
             }
         })
 
-        new Vue({
+        var vm = new Vue({
             el: '#app',
+            data: function () {
+                return { current1: "BTC", current2: "ETH" }
+            }
         });
     </script>
 </body>
