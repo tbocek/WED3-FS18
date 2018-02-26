@@ -7,7 +7,7 @@
 
 <body>
     <div id="app">
-        <p v-for="item in coins">
+        <p v-for="item in userCoinPortfolio">
             <input v-model="item.symbol" placeholder="BTC">
             <input v-model="item.amount" placeholder="0">
             {{item.amount * find(item.symbol)}}
@@ -16,19 +16,19 @@
         <p>Total: {{total | round}} USD</p>
         <select v-model="selected">
             <option disabled value="">Please select one</option>
-            <option v-for="price in prices" :value="price.symbol">
-                {{ price.name }}
+            <option v-for="item in coinmarketcapData" :value="item.symbol">
+                {{ item.name }}
             </option>
         </select>
-        <button @click="coins.push({'symbol' : selected, 'amount': '0'})">add</button>
+        <button @click="userCoinPortfolio.push({'symbol' : selected, 'amount': '0'})">add</button>
     </div>
 
     <script type="text/javascript">
         new Vue({
             el: '#app',
             data: {
-                prices: [],
-                coins: [],
+                coinmarketcapData: [],
+                userCoinPortfolio: [],
                 uuid: '',
                 selected: ''
             },
@@ -49,21 +49,21 @@
                 fetch: function () {
                     fetch('https://api.coinmarketcap.com/v1/ticker/?limit=10')
                         .then(response => response.json())
-                        .then(body => { this.prices = body });
+                        .then(body => { this.coinmarketcapData = body });
                 },
                 find: function(symbol) {
-                    let found = this.prices.find(function(element) {
+                    let found = this.coinmarketcapData.find(function(element) {
                         return element.symbol === symbol
                     });
                     return parseFloat(found.price_usd)
                 },
                 remove: function(symbol) {
-                    this.coins = this.coins.filter(item => item.symbol !== symbol)
+                    this.userCoinPortfolio = this.userCoinPortfolio.filter(item => item.symbol !== symbol)
                 }
             },
             computed: {
                 total: function () {
-                    return this.coins.reduce((total, item) => {
+                    return this.userCoinPortfolio.reduce((total, item) => {
                         return total + (item.amount * this.find(item.symbol));
                     }, 0)
                 }
@@ -74,14 +74,14 @@
                         fetch('/portfolio/'+this.uuid)
                         .then(response => response.json())
                         .then(body => {
-                            this.coins = body;
+                            this.userCoinPortfolio = body;
                         });
                 },
-                coins: {
+                userCoinPortfolio: {
                     handler: function(newUuid) {
                         fetch('/portfolio/' + this.uuid, {
                             method: 'POST',
-                            body: JSON.stringify(this.coins)
+                            body: JSON.stringify(this.userCoinPortfolio)
                         })
                     }, deep: true
                 }
